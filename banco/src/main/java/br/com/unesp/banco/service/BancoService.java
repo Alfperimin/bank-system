@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Classe para gerenciar as operações do banco, como cadastro de clientes,
  * abertura de contas, movimentações financeiras e consulta de extratos.
