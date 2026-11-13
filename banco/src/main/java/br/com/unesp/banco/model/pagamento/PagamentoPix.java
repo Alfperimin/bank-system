@@ -1,0 +1,29 @@
+package br.com.unesp.banco.model.pagamento;
+
+import br.com.unesp.banco.model.conta.Conta;
+import br.com.unesp.banco.model.transacao.TipoTransacao;
+import java.math.BigDecimal;
+
+/**
+ * Implementação do pagamento via Pix.
+ */
+public class PagamentoPix implements Pagamento {
+    /**
+     * Método para registrar o pagamento com o tipo PIX.
+     * @param conta conta que será debitada.
+     * @param valor valor do pagamento.
+     */
+    @Override
+    public void pagar(Conta conta, BigDecimal valor) {
+        conta.pagar(TipoTransacao.PIX, valor);
+    }
+
+    /**
+     * Método para informar se o sistema deve notificar o pagamento.
+     * @return true para pagamento com notificação.
+     */
+    @Override
+    public boolean notificar() {
+        return true;
+    }
+}
