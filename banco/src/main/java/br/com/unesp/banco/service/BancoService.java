@@ -36,6 +36,31 @@ public class BancoService {
     private final List<Conta> contas = new ArrayList<>();
     private int nextId = 1;
 
+    /**
+     * Serviço usado para notificar o cliente após as transações bem-sucedidas.
+     * Enquanto não for configurado, nenhuma notificação é enviada.
+     */
+    private NotificacaoService notificacao;
+
+    /**
+     * Método para configurar o serviço de notificações.
+     * @param notificacao serviço que enviará as notificações aos clientes.
+     */
+    public void setNotificacaoService(NotificacaoService notificacao) {
+        this.notificacao = notificacao;
+    }
+
+    /**
+     * Método interno para notificar o titular da conta após uma transação bem-sucedida.
+     * @param conta conta cujo titular será notificado.
+     * @param mensagem texto da notificação.
+     */
+    private void notificar(Conta conta, String mensagem) {
+        if (notificacao != null) {
+            notificacao.enviarNotificacao(conta.getTitular(), mensagem);
+        }
+    }
+
 
     /**
      * Método para a adição de clientes na lista de clientes registrados.
@@ -132,7 +157,9 @@ public class BancoService {
      * @param valor valor a ser depositado.
      */
     public void depositar(int numeroConta, BigDecimal valor) {
-        buscarConta(numeroConta).depositar(valor);
+        Conta conta = buscarConta(numeroConta);
+        conta.depositar(valor);
+        notificar(conta, String.format("Depósito de R$ %.2f realizado na conta %d.", valor, numeroConta));
     }
 
     /**
@@ -141,7 +168,9 @@ public class BancoService {
      * @param valor valor a ser sacado.
      */
     public void sacar(int numeroConta, BigDecimal valor) {
-        buscarConta(numeroConta).sacar(valor);
+        Conta conta = buscarConta(numeroConta);
+        conta.sacar(valor);
+        notificar(conta, String.format("Saque de R$ %.2f realizado na conta %d.", valor, numeroConta));
     }
 
     /**
@@ -154,6 +183,7 @@ public class BancoService {
         Conta contaOrigem = buscarConta(origem);
         Conta contaDestino = buscarConta(destino);
         contaOrigem.transferir(contaDestino, valor);
+        notificar(contaOrigem, String.format("Transferência de R$ %.2f da conta %d para a conta %d realizada.", valor, origem, destino));
     }
 
     /**
@@ -166,6 +196,11 @@ public class BancoService {
         Conta conta = buscarConta(numeroConta);
         Pagamento pagamento = PagamentoFactory.criar(tipo);
         pagamento.pagar(conta, valor);
+
+        if (pagamento.notificar()) {
+            notificar(conta, String.format("Pagamento via %s de R$ %.2f realizado na conta %d.",
+                tipo.trim().toUpperCase(), valor, numeroConta));
+        }
     }
 
     /**
